@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二叉树树加密机</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        h1 { text-align: center; color: #333; }
+        .textarea-container { position: relative; }
+        textarea { width: 100%; height: 100px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; padding: 10px; }
+        .clear-icon { position: absolute; right: 10px; top: 10px; color: #d9534f; font-size: 20px; cursor: pointer; }
+        button { margin: 5px; padding: 10px 15px; border: none; border-radius: 5px; background-color: #5cb85c; color: white; cursor: pointer; }
+        button:hover { background-color: #4cae4c; }
+        .output { margin-top: 20px; padding: 10px; background-color: white; border: 1px solid #ccc; border-radius: 5px; }
+        .controls { text-align: center; margin-top: 10px; }
+        .copy-icon, .clear-icon { color: #5bc0de; font-size: 20px; cursor: pointer; margin-left: 10px; }
+        .output-container { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>二叉树树加密机</h1>
+    <div class="textarea-container">
+        <textarea id="input" placeholder="输入明文或密文..."></textarea>
+        <span class="clear-icon" id="clear-icon" onclick="clearText()" title="清空文本框">×</span>
+    </div>
+    <div class="controls">
+        <button onclick="encrypt()">加密</button>
+        <button onclick="decrypt()">解密</button>
+        <button onclick="replaceInput()">将结果替换到输入框</button>
+    </div>
+    <div class="output-container">
+        <h2>结果：</h2>
+        <div class="output" id="output"></div>
+        <span class="copy-icon" id="copy-icon" onclick="copyResult()" title="复制结果">📋</span>
+    </div>
+
+    <script>
+        function stringToBinary(str) {
+            let bytes = new TextEncoder().encode(str);
+            return [...bytes].map(byte => byte.toString(2).padStart(8, '0')).join('');
+        }
+
+        function binaryToString(binary) {
+            let byteArray = binary.match(/.{8}/g).map(b => parseInt(b, 2));
+            return new TextDecoder().decode(new Uint8Array(byteArray));
+        }
+
+        function encrypt() {
+            let input = document.getElementById('input').value;
+            let encoding = /^[\x00-\x7F]*$/.test(input) ? 'ASCII' : 'UTF-8';
+            let header = encoding === 'ASCII' ? 'ASCII' : 'UTF8';
+            let combined = `${header}#${input}`;
+            let binary = stringToBinary(combined);
+            let encrypted = binary.replace(/0/g, '二叉').replace(/1/g, '树树');
+            document.getElementById('output').innerText = encrypted;
+        }
+
+        function decrypt() {
+            let input = document.getElementById('input').value;
+            let binary = input.replace(/二叉/g, '0').replace(/树树/g, '1');
+
+            try {
+                let decodedBinary = binaryToString(binary);
+                let [header, originalText] = decodedBinary.split('#');
+                document.getElementById('output').innerText = `${header}:\n${originalText}`;
+            } catch (e) {
+                document.getElementById('output').innerText = '解密失败：数据损坏或编码错误';
+            }
+        }
+
+        function clearText() {
+            document.getElementById('input').value = '';
+            document.getElementById('output').innerText = '';
+            showSuccessIcon('clear-icon', '×', '#d9534f'); // 红色
+        }
+
+        function copyResult() {
+            let output = document.getElementById('output').innerText;
+            navigator.clipboard.writeText(output).then(() => {
+                showSuccessIcon('copy-icon', '📋', '#5bc0de'); // 默认颜色
+            }).catch(err => {
+                console.error('复制失败：', err);
+            });
+        }
+
+        function replaceInput() {
+            let output = document.getElementById('output').innerText;
+            document.getElementById('input').value = output;
+        }
+
+        function showSuccessIcon(iconId, originalIcon, color) {
+            const icon = document.getElementById(iconId);
+            icon.innerText = '✔️'; // 显示勾号
+            icon.style.color = '#5cb85c'; // 设置颜色为绿色
+            setTimeout(() => {
+                icon.innerText = originalIcon; // 恢复为原来的图标
+                icon.style.color = color; // 恢复颜色
+            }, 2000); // 2秒后恢复
+        }
+    </script>
+</body>
+</html>
